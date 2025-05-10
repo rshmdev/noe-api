@@ -17,7 +17,10 @@ export class ChatGateway {
   server: Server;
 
   sendNewMessage(chatId: string, message: any, receiverUserId: string) {
-    this.server.to(receiverUserId).emit('newMessage', message);
+    // Envia para todos os usuários na sala do chat
+    this.server.to(chatId).emit('newMessage', message);
+
+    // Envia a atualização de mensagem não lida para o usuário específico
     this.server.to(receiverUserId).emit('unreadUpdate', { chatId });
   }
 
@@ -27,8 +30,11 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
     if (payload.chatId) {
+      console.log(`User ${payload.userId} joined chat ${payload.chatId}`);
       client.join(payload.chatId);
     }
+
+    console.log(`User ${payload.userId} joined their personal room`);
     client.join(payload.userId);
   }
 }
